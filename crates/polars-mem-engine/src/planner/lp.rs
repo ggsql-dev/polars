@@ -24,6 +24,12 @@ fn partitionable_gb(
     expr_arena: &Arena<AExpr>,
     apply: &Option<PlanCallback<DataFrame, DataFrame>>,
 ) -> bool {
+    // The partitioned group_by path uses the streaming executor, which is not
+    // available on wasm32.
+    if cfg!(target_arch = "wasm32") {
+        return false;
+    }
+
     // checks:
     //      1. complex expressions in the group_by itself are also not partitionable
     //          in this case anything more than col("foo")
